@@ -1,0 +1,193 @@
+---
+title:cricket data analysis
+date: "2024-03-12"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Sri Lankan Cricket Analysis
+
+## Research Objective
+
+The objective of this analysis is to explore and visualize various aspects of cricket performance, including bowling, batting and fielding statistics for Sri Lanka Men's cricket team
+
+-   Sri Lanka Men ODI Bowling performance
+
+-   Test bowling performance of Lasith Malinga
+
+-   Sri Lanka Men ODI Batting performance
+
+-   Fielding statistics for Sri Lanka Men's ODI team
+
+### R Packeges
+
+```{r,warning=FALSE,message=FALSE}
+library(tidyverse)
+library(plotly)
+library(devtools)
+library(cricketdata)
+```
+
+### Fetch Sri Lanka ODI bowling data
+
+```{r}
+SL_bowling <- fetch_cricinfo("ODI", "Men", "Bowling", country = "Sri Lanka")
+head(SL_bowling)
+```
+
+### Display column names
+
+```{r}
+colnames(SL_bowling)
+```
+
+```{r}
+dim(SL_bowling)
+```
+
+### Fetch Sri Lanka ODI batting data
+
+```{r}
+SL_batting <- fetch_cricinfo("ODI", "Men", "Batting", country = "Sri Lanka")
+head(SL_batting)
+```
+
+```{r}
+dim(SL_batting)
+```
+
+```{r}
+colnames(SL_batting)
+```
+
+### Fetch Sri Lanka ODI Fielding data
+
+```{r}
+SL_fielding <- fetch_cricinfo("ODI", "Men", "Fielding", country = "Sri Lanka")
+head(SL_fielding)
+```
+
+```{r}
+colnames(SL_fielding)
+```
+
+```{r}
+dim(SL_fielding)
+```
+
+## Visualization and Interpretation
+
+```{r}
+
+plot01 <- SL_bowling |> 
+  ggplot(aes(x = Wickets, y = Economy, text = Player)) +
+  geom_point(size = 2, shape = 21, fill = "#3392FF", stroke = 0.2, color = "black") + 
+  ggtitle("Sri Lanka Men ODI Bowling Performance (Wickets vs Economy)") +
+  theme_bw()
+
+ggplotly(plot01)
+
+```
+
+The plot 01 visualizes the relationship between wickets taken and economy rate for Sri Lanka Men's ODI bowling performances. According to the given figure M. Muralidaran emerges as the foremost bowler in Sri Lanka, Following closely behind is Chaminda Vaas, displaying his formidable skills on the cricket field. Additionally, the figure illustrates the impressive performances of Lasith Malinga and Sanath Jayasuriya, further solidifying Sri Lanka's rich legacy in cricketing excellence.
+
+```{r}
+Malinga_id <- find_player_id("SL Malinga")$ID
+Malinga_bowling <- fetch_player_data(Malinga_id, "Test", "Bowling")
+head(Malinga_bowling)
+```
+
+```{r}
+colnames(Malinga_bowling)
+```
+
+```{r}
+find_player_id("SL Malinga")
+
+```
+
+```{r}
+Malinga <- fetch_player_data(49758, "test", "bowling")
+Malinga
+```
+
+```{r}
+plot02 <- ggplot(Malinga, aes(x = Date, y = cumsum(coalesce(as.numeric(Wkts), 0)))) +
+  geom_line(linewidth = 0.5, color = "red") + 
+  scale_y_continuous(limits = c(0, 100)) +
+  ggtitle("Lasith Malinga Test Wickets Performance") +
+  xlab("Date") +
+  ylab("Total Wickets") +
+  theme_bw() 
+
+ggplotly(plot02)
+
+```
+
+#### 
+
+The plot 02 gives the progression of Lasith Malinga's total wickets over time in Test matches. It provides insights into Malinga's performance and career trajectory in Test cricket. Notably, the plot reveals a significant gap between 2008 and 2010, indicating a period where Malinga's presence in Test matches was relatively sparse. In 2010, his total wickets stand at 93
+
+Fetch Sri Lanka ODI batting data
+
+```{r}
+SL_batting <- fetch_cricinfo("ODI", "Men", "Batting", country = "Sri Lanka")
+SL_batting
+```
+
+```{r}
+SL_batting$Average <- SL_batting$Runs / SL_batting$Innings
+```
+
+### Removing missing values
+
+```{r}
+SL_batting_filtered <- na.omit(SL_batting)
+SL_batting_filtered_new <- SL_batting_filtered |> filter(Innings >10)
+```
+
+```{r}
+plot03 <- ggplot(SL_batting_filtered_new, aes(x = Average, y = StrikeRate, text = Player)) +
+  geom_point(size = 2, shape = 21, fill = "lightgreen", stroke = 0.2, color = "black") +  
+  labs(title = "Best bastman with a high strike", x = "Average", y = "Strike Rate") +
+  theme_bw() 
+
+ggplotly(plot03)
+```
+
+This plot illustrates the relationship between batting average and strike rate for Sri Lanka Men's ODI batting performances. Analysis of the graph indicates that P. Nissanka emerges as the top batsman, demonstrating a combination of high batting average and commendable strike rate. Following closely behind is Kumar Sangakkara, showcasing his prowess with the bat in the ODI format. Additionally, the graph highlights the notable performances of MD Gunathilaka and KIC Asalanka, further contributing to Sri Lanka's cricketing legacy in ODI cricket.
+
+```{r}
+SL_fielding <- fetch_cricinfo("ODI", "Men", "Fielding", country = "Sri Lanka")
+head(SL_fielding)
+```
+
+```{r}
+plot04 <- ggplot(SL_fielding, aes(x = CaughtBehind, y = Stumped, text = Player)) +
+  geom_point(size = 2, shape = 21, fill = "yellow", stroke = 0.2, color = "black") +  # Customizing point appearance
+  labs(title = "Best WicketKepers in the Sri Lanka", x = "Caught Behind", y = "Stumped") +
+  theme_bw() 
+
+ggplotly(plot04)
+```
+
+The plot 04 showcases the relationship between caught behind and stumped dismissals for players in Sri Lanka Men's ODI team. It provides insights into the fielding prowess of the players in different wicketkeeping scenarios. According to the above plot 04 Kumar Sangakkara is the best wicketkeper in the Sri Lanka. R.S. kaluwitharana is the 2nd best Wicketkiper in the Sri lanka.
+
+## Conclusion
+
+-   M. Muralidaran is the foremost bowler in Sri Lanka, Following closely behind is Chaminda Vaas.
+
+-   P. Nissanka emerges as the top batsman. Following closely behind is Kumar Sangakkara.
+
+-   Kumar Sangakkara is the best wicketkeper in the Sri Lanka. R.S. kaluwitharana is the 2nd best Wicketkiper in the Sri lanka
+
+## References
+
+-   Hyndman, R. (2022). cricketdata: Retrieval and Analysis of Cricket Data from ESPN Cricinfo. R package version 0.1.0. URL: <https://github.com/robjhyndman/cricketdata>
+
+-   <https://online.uom.lk/pluginfile.php/778630/mod_resource/content/2/Introduction-to-TIdy-Tools.html>
